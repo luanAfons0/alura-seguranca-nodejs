@@ -5,8 +5,8 @@ module.exports = {
     await queryInterface.createTable("usuarios_permissoes", {
       id: {
         allowNull: false,
-        primaryKey: true,
         autoIncrement: true,
+        primaryKey: true,
         type: Sequelize.INTEGER,
       },
       usuario_id: {
@@ -20,6 +20,12 @@ module.exports = {
       },
       permissao_id: {
         type: Sequelize.UUID,
+        references: {
+          model: "permissoes",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
       createdAt: {
         allowNull: false,

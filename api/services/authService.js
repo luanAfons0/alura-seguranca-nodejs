@@ -1,45 +1,39 @@
 const database = require("../models");
-const { sign } = require("jsonwebtoken");
 const { compare } = require("bcryptjs");
+const { sign } = require("jsonwebtoken");
 const jsonSecret = require("../config/jsonSecret");
 
 class AuthService {
-  static async login(email, senha) {
-    try {
-      const usuario = await database.usuarios.findOne({
-        attributes: ["id", "email", "senha"],
-        where: {
-          email: email,
-        },
-      });
+  async login(dto) {
+    const usuario = await database.usuarios.findOne({
+      attributes: ["id", "email", "senha"],
+      where: {
+        email: dto.email,
+      },
+    });
 
-      if (!usuario) {
-        throw new Error("Usuario não cadastrado");
-      }
-
-      const senhasIguais = await compare(senha, usuario.senha);
-
-      if (!senhasIguais) {
-        throw new Error("Senha incorreta!");
-      }
-
-      console.log(jsonSecret);
-
-      const accessToken = sign(
-        {
-          id: usuario.id,
-          email: email,
-        },
-        jsonSecret.secret,
-        {
-          expiresIn: 86400,
-        }
-      );
-      return { accessToken };
-    } catch (error) {
-      console.error("Message error: ", error.message);
-      throw error;
+    if (!usuario) {
+      throw new Error("Usuario não cadastrado");
     }
+
+    const senhaIguais = await compare(dto.senha, usuario.senha);
+
+    if (!senhaIguais) {
+      throw new Error("Usuario ou senha invalido");
+    }
+
+    const accessToken = sign(
+      {
+        id: usuario.id,
+        email: usuario.email,
+      },
+      jsonSecret.secret,
+      {
+        expiresIn: 86400,
+      }
+    );
+
+    return { accessToken };
   }
 }
 

@@ -1,20 +1,20 @@
-const database = require("../models/index");
+const database = require("../models");
 const { hash } = require("bcryptjs");
 const uuid = require("uuid");
 
 class UsuarioService {
   async cadastrar(dto) {
+    const usuario = await database.usuarios.findOne({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (usuario) {
+      throw new Error("Usuario ja cadastrado");
+    }
+
     try {
-      const usuario = await database.usuarios.findOne({
-        where: {
-          email: dto.email,
-        },
-      });
-
-      if (usuario) {
-        throw new Error("Usuario ja cadastrado");
-      }
-
       const senhaHash = await hash(dto.senha, 8);
 
       const novoUsuario = await database.usuarios.create({
@@ -30,76 +30,52 @@ class UsuarioService {
     }
   }
 
-  async pegaTodosUsuarios() {
-    try {
-      const usuarios = await database.usuarios.findAll({});
-      return usuarios;
-    } catch (error) {
-      throw new Error("Erro ao consusltar usuarios");
-    }
+  async buscarTodosUsuarios() {
+    const usuarios = await database.usuarios.findAll();
+
+    return usuarios;
   }
 
-  async pegaUsuarioPorId(id) {
-    try {
-      const usuario = await database.usuarios.findOne({
-        where: {
-          id: id,
-        },
-      });
+  async buscarUsuarioPorId(id) {
+    const usuario = await database.usuarios.findOne({
+      where: {
+        id: id,
+      },
+    });
 
-      if (!usuario) {
-        throw new Error("Usuario não encontrado, verifique as informações");
-      }
+    if (!usuario) {
+      throw new Error("Usuario informado não cadastrado!");
+    }
+
+    return usuario;
+  }
+
+  async editarUsuario(dto) {
+    const usuario = await this.buscarUsuarioPorId(dto.id);
+
+    try {
+      usuario.nome = dto.nome;
+      usuario.email = dto.email;
+
+      await usuario.save();
 
       return usuario;
     } catch (error) {
-      throw new Error("Erro ao consusltar usuario");
+      throw new Error("Erro ao editar usuario!");
     }
   }
 
-  async atualizaUsuarioPorId(id, dto) {
+  async deletarUsuario(id) {
+    await this.buscarUsuarioPorId(id);
+
     try {
-      const usuarioAtualizado = await database.usuarios.findOne({
+      await database.usuarios.destroy({
         where: {
           id: id,
         },
       });
-
-      if (!usuarioAtualizado) {
-        throw new Error("Usuario não encontrado, verifique as informações");
-      }
-
-      const novaSenhaHasheada = await hash(dto.senha, 8);
-
-      usuarioAtualizado.nome = dto.nome;
-      usuarioAtualizado.email = dto.email;
-      usuarioAtualizado.senha = novaSenhaHasheada;
-
-      await usuarioAtualizado.save();
-
-      return usuarioAtualizado;
     } catch (error) {
-      throw new Error("Erro ao atualizar usuario");
-    }
-  }
-
-  async deletaUsuarioPorId(id) {
-    try {
-      const usuarioDeletado = await database.usuarios.findOne({
-        where: {
-          id: id,
-        },
-      });
-
-      if (!usuarioDeletado) {
-        throw new Error("Usuario não encontrado, verifique as informações");
-      }
-
-      await usuarioDeletado.destroy();
-
-      return usuarioDeletado;
-    } catch (error) {
-      throw new Error("Erro ao deletar usuario");
+      throw new Error("Erro ao tentar deletar o usuario!");
     }
   }
 }
