@@ -1,23 +1,23 @@
 {
   "development": {
-    "username": "postgres",
-    "password": "123456",
+    "username": "admin",
+    "password": "admin123",
     "database": "seguranca_nodejs_development",
     "host": "127.0.0.1",
-    "dialect": "postgres"
+    "dialect": "mysql"
   },
   "test": {
-    "username": "postgres",
-    "password": "123456",
-    "database": "seguranca_nodejs_test",
+    "username": "admin",
+    "password": "admin123",
+    "database": "seguranca_nodejs_development",
     "host": "127.0.0.1",
-    "dialect": "postgres"
+    "dialect": "mysql"
   },
   "production": {
-    "username": "postgres",
-    "password": "123456",
-    "database": "seguranca_nodejs_production",
+    "username": "admin",
+    "password": "admin123",
+    "database": "seguranca_nodejs_development",
     "host": "127.0.0.1",
-    "dialect": "postgres"
+    "dialect": "mysql"
   }
 }
